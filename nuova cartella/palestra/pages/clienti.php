@@ -30,7 +30,6 @@ $clienti = $pdo->query("
             justify-content: space-between;
             align-items: center;
         }
-        .navbar h1 { font-size: 20px; }
         .navbar a {
             color: white;
             text-decoration: none;
@@ -51,10 +50,7 @@ $clienti = $pdo->query("
             align-items: center;
             margin-bottom: 24px;
         }
-        .intestazione h2 {
-            font-size: 22px;
-            color: #1a1a2e;
-        }
+        .intestazione h2 { font-size: 22px; color: #1a1a2e; }
         .btn {
             background: #1a1a2e;
             color: white;
@@ -102,6 +98,23 @@ $clienti = $pdo->query("
             color: #888;
             font-size: 15px;
         }
+        .btn-modifica {
+            background: #1a1a2e;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        .btn-elimina {
+            background: #c62828;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+            margin-left: 4px;
+        }
     </style>
 </head>
 <body>
@@ -129,12 +142,13 @@ $clienti = $pdo->query("
                 <th>Livello</th>
                 <th>Stato</th>
                 <th>Cert. Medico</th>
+                <th>Azioni</th>
             </tr>
         </thead>
         <tbody>
             <?php if(empty($clienti)): ?>
             <tr>
-                <td colspan="6" class="nessun-cliente">Nessun cliente ancora — aggiungine uno!</td>
+                <td colspan="7" class="nessun-cliente">Nessun cliente ancora!</td>
             </tr>
             <?php else: ?>
             <?php foreach($clienti as $c): ?>
@@ -149,6 +163,10 @@ $clienti = $pdo->query("
                     </span>
                 </td>
                 <td><?= $c['certificato_medico_scadenza'] ?? '—' ?></td>
+                <td>
+                    <a class="btn-modifica" href="modifica_cliente.php?id=<?= $c['id_persona'] ?>">✏️ Modifica</a>
+                    <a class="btn-elimina" href="elimina_cliente.php?id=<?= $c['id_persona'] ?>" onclick="return confirm('Sei sicuro di voler eliminare questo cliente?')">🗑️ Elimina</a>
+                </td>
             </tr>
             <?php endforeach; ?>
             <?php endif; ?>

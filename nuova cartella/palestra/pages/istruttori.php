@@ -30,7 +30,6 @@ $istruttori = $pdo->query("
             justify-content: space-between;
             align-items: center;
         }
-        .navbar h1 { font-size: 20px; }
         .navbar a {
             color: white;
             text-decoration: none;
@@ -99,6 +98,23 @@ $istruttori = $pdo->query("
             color: #888;
             font-size: 15px;
         }
+        .btn-modifica {
+            background: #1a1a2e;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        .btn-elimina {
+            background: #c62828;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+            margin-left: 4px;
+        }
     </style>
 </head>
 <body>
@@ -126,12 +142,13 @@ $istruttori = $pdo->query("
                 <th>Contratto</th>
                 <th>Stipendio</th>
                 <th>Data Assunzione</th>
+                <th>Azioni</th>
             </tr>
         </thead>
         <tbody>
             <?php if(empty($istruttori)): ?>
             <tr>
-                <td colspan="6" class="nessun-record">Nessun istruttore ancora — aggiungine uno!</td>
+                <td colspan="7" class="nessun-record">Nessun istruttore ancora!</td>
             </tr>
             <?php else: ?>
             <?php foreach($istruttori as $i): ?>
@@ -146,6 +163,10 @@ $istruttori = $pdo->query("
                 </td>
                 <td>€ <?= number_format($i['stipendio'], 2, ',', '.') ?></td>
                 <td><?= date('d/m/Y', strtotime($i['data_assunzione'])) ?></td>
+                <td>
+                    <a class="btn-modifica" href="modifica_istruttore.php?id=<?= $i['id_persona'] ?>">✏️ Modifica</a>
+                    <a class="btn-elimina" href="elimina_istruttore.php?id=<?= $i['id_persona'] ?>" onclick="return confirm('Sei sicuro di voler eliminare questo istruttore?')">🗑️ Elimina</a>
+                </td>
             </tr>
             <?php endforeach; ?>
             <?php endif; ?>

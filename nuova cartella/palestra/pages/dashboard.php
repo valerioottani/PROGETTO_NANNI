@@ -22,7 +22,6 @@ $utente = $_SESSION['utente'];
             justify-content: space-between;
             align-items: center;
         }
-        .navbar h1 { font-size: 20px; }
         .navbar a {
             color: white;
             text-decoration: none;
@@ -33,7 +32,7 @@ $utente = $_SESSION['utente'];
         }
         .navbar a:hover { background: rgba(255,255,255,0.2); }
         .contenuto {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 40px auto;
             padding: 0 20px;
         }
@@ -81,7 +80,7 @@ $utente = $_SESSION['utente'];
 
 <div class="navbar">
     <img src="../assets/logo.jpg" style="height:40px;">
-    <span>Ciao, <?= htmlspecialchars($utente['nome']) ?>!</span>
+    <span style="font-size:14px;">Ciao, <?= htmlspecialchars($utente['nome']) ?>!</span>
     <a href="../logout.php">Esci</a>
 </div>
 
@@ -94,6 +93,11 @@ $utente = $_SESSION['utente'];
             <div class="icona">👤</div>
             <div class="titolo">Clienti</div>
             <div class="descrizione">Gestisci i clienti e i loro abbonamenti</div>
+        </a>
+        <a class="card" href="istruttori.php">
+            <div class="icona">🏃</div>
+            <div class="titolo">Istruttori</div>
+            <div class="descrizione">Gestisci gli istruttori e i contratti</div>
         </a>
         <a class="card" href="corsi.php">
             <div class="icona">🏋️</div>
