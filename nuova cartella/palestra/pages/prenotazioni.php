@@ -35,7 +35,6 @@ $prenotazioni = $pdo->query("
             justify-content: space-between;
             align-items: center;
         }
-        .navbar h1 { font-size: 20px; }
         .navbar a {
             color: white;
             text-decoration: none;
@@ -86,6 +85,7 @@ $prenotazioni = $pdo->query("
             font-size: 13px;
             border-bottom: 1px solid #f0f2f5;
             color: #333;
+            vertical-align: middle;
         }
         tr:last-child td { border-bottom: none; }
         tr:hover td { background: #f9f9f9; }
@@ -107,6 +107,17 @@ $prenotazioni = $pdo->query("
             color: #888;
             font-size: 15px;
         }
+        .btn-azione {
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+            display: inline-block;
+            margin: 2px 2px 2px 0;
+        }
+        .btn-modifica { background: #1a1a2e; }
+        .btn-elimina { background: #c62828; }
     </style>
 </head>
 <body>
@@ -135,12 +146,13 @@ $prenotazioni = $pdo->query("
                 <th>Prenotato il</th>
                 <th>Presenza</th>
                 <th>Stato</th>
+                <th>Azioni</th>
             </tr>
         </thead>
         <tbody>
             <?php if(empty($prenotazioni)): ?>
             <tr>
-                <td colspan="7" class="nessun-record">Nessuna prenotazione ancora!</td>
+                <td colspan="8" class="nessun-record">Nessuna prenotazione ancora!</td>
             </tr>
             <?php else: ?>
             <?php foreach($prenotazioni as $p): ?>
@@ -154,7 +166,7 @@ $prenotazioni = $pdo->query("
                     <?php if($p['presenza']): ?>
                         <span class="presenza-si">✓ Presente</span>
                     <?php else: ?>
-                        <span class="presenza-no">✗ Assente</span>
+                        <span class="presenza-no">✗ Da confermare</span>
                     <?php endif; ?>
                 </td>
                 <td>
@@ -162,11 +174,19 @@ $prenotazioni = $pdo->query("
                         <?= $p['stato'] ?>
                     </span>
                 </td>
+                <td>
+                    <a class="btn-azione btn-modifica" href="modifica_prenotazione.php?id=<?= $p['id_prenotazione'] ?>">✏️ Modifica</a>
+                    <a class="btn-azione btn-elimina" href="elimina_prenotazione.php?id=<?= $p['id_prenotazione'] ?>" onclick="return confirm('Sei sicuro?')">🗑️ Elimina</a>
+                </td>
             </tr>
             <?php endforeach; ?>
             <?php endif; ?>
         </tbody>
     </table>
+
+    <div style="margin-top:16px; background:white; border-radius:12px; padding:16px 24px; box-shadow:0 2px 8px rgba(0,0,0,0.07); font-size:13px; color:#555;">
+        💡 <strong>Come funziona la presenza:</strong> Quando una lezione è completata, clicca <strong>✏️ Modifica</strong> sulla prenotazione e spunta la casella <strong>"Cliente presente"</strong> per registrare la presenza.
+    </div>
 </div>
 
 </body>

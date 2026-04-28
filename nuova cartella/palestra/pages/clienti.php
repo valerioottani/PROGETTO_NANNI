@@ -8,14 +8,9 @@ require_once "../config/db.php";
 
 $clienti = $pdo->query("
     SELECT P.id_persona, P.nome, P.cognome, P.email, P.telefono,
-           C.stato_iscrizione, C.livello, C.certificato_medico_scadenza,
-           A.codice AS codice_abbonamento, A.tipo AS tipo_abbonamento,
-           A.stato AS stato_abbonamento, A.data_fine
+           C.stato_iscrizione, C.livello, C.certificato_medico_scadenza
     FROM PERSONA P
     JOIN CLIENTE C ON P.id_persona = C.id_persona
-    LEFT JOIN ABBONAMENTO A ON A.id_cliente = C.id_persona
-        AND A.stato = 'attivo'
-        AND A.data_fine >= CURDATE()
     ORDER BY P.cognome, P.nome
 ")->fetchAll();
 ?>
@@ -98,7 +93,6 @@ $clienti = $pdo->query("
         .badge.attivo { background: #e8f5e9; color: #2e7d32; }
         .badge.sospeso { background: #fff3e0; color: #e65100; }
         .badge.scaduto { background: #ffebee; color: #c62828; }
-        .badge.nessuno { background: #f5f5f5; color: #999; }
         .nessun-cliente {
             text-align: center;
             padding: 40px;
@@ -117,11 +111,6 @@ $clienti = $pdo->query("
         .btn-modifica { background: #1a1a2e; }
         .btn-abbonamento { background: #2e7d32; }
         .btn-elimina { background: #c62828; }
-        .codice-abb {
-            font-family: monospace;
-            font-size: 11px;
-            color: #555;
-        }
     </style>
 </head>
 <body>
@@ -145,9 +134,9 @@ $clienti = $pdo->query("
             <tr>
                 <th>Nome</th>
                 <th>Email</th>
+                <th>Telefono</th>
                 <th>Livello</th>
                 <th>Stato</th>
-                <th>Abbonamento attivo</th>
                 <th>Cert. Medico</th>
                 <th>Azioni</th>
             </tr>
@@ -160,22 +149,17 @@ $clienti = $pdo->query("
             <?php else: ?>
             <?php foreach($clienti as $c): ?>
             <tr>
-                <td><strong><?= htmlspecialchars($c['cognome'].' '.$c['nome']) ?></strong><br><small style="color:#888"><?= htmlspecialchars($c['telefono']) ?></small></td>
+                <td>
+                    <strong><?= htmlspecialchars($c['cognome'].' '.$c['nome']) ?></strong>
+                    <br><small style="color:#888"><?= htmlspecialchars($c['telefono']) ?></small>
+                </td>
                 <td><?= htmlspecialchars($c['email']) ?></td>
+                <td><?= htmlspecialchars($c['telefono']) ?></td>
                 <td><?= htmlspecialchars($c['livello']) ?></td>
                 <td>
                     <span class="badge <?= $c['stato_iscrizione'] ?>">
                         <?= $c['stato_iscrizione'] ?>
                     </span>
-                </td>
-                <td>
-                    <?php if($c['codice_abbonamento']): ?>
-                        <span class="badge attivo"><?= $c['tipo_abbonamento'] ?></span><br>
-                        <span class="codice-abb"><?= htmlspecialchars($c['codice_abbonamento']) ?></span><br>
-                        <small style="color:#888">scade: <?= date('d/m/Y', strtotime($c['data_fine'])) ?></small>
-                    <?php else: ?>
-                        <span class="badge nessuno">Nessuno</span>
-                    <?php endif; ?>
                 </td>
                 <td><?= $c['certificato_medico_scadenza'] ? date('d/m/Y', strtotime($c['certificato_medico_scadenza'])) : '—' ?></td>
                 <td>
