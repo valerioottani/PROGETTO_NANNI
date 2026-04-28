@@ -32,7 +32,6 @@ $lezioni = $pdo->query("
             justify-content: space-between;
             align-items: center;
         }
-        .navbar h1 { font-size: 20px; }
         .navbar a {
             color: white;
             text-decoration: none;
@@ -102,6 +101,23 @@ $lezioni = $pdo->query("
             color: #888;
             font-size: 15px;
         }
+        .btn-modifica {
+            background: #1a1a2e;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        .btn-elimina {
+            background: #c62828;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+            margin-left: 4px;
+        }
     </style>
 </head>
 <body>
@@ -129,12 +145,13 @@ $lezioni = $pdo->query("
                 <th>Orario</th>
                 <th>Tipo</th>
                 <th>Stato</th>
+                <th>Azioni</th>
             </tr>
         </thead>
         <tbody>
             <?php if(empty($lezioni)): ?>
             <tr>
-                <td colspan="6" class="nessun-record">Nessuna lezione ancora — aggiungine una!</td>
+                <td colspan="7" class="nessun-record">Nessuna lezione ancora!</td>
             </tr>
             <?php else: ?>
             <?php foreach($lezioni as $l): ?>
@@ -148,6 +165,10 @@ $lezioni = $pdo->query("
                     <span class="badge <?= $l['stato'] ?>">
                         <?= $l['stato'] ?>
                     </span>
+                </td>
+                <td>
+                    <a class="btn-modifica" href="modifica_lezione.php?id=<?= $l['id_lezione'] ?>">✏️ Modifica</a>
+                    <a class="btn-elimina" href="elimina_lezione.php?id=<?= $l['id_lezione'] ?>" onclick="return confirm('Sei sicuro di voler eliminare questa lezione?')">🗑️ Elimina</a>
                 </td>
             </tr>
             <?php endforeach; ?>

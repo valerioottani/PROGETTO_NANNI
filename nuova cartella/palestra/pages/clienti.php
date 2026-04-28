@@ -8,9 +8,14 @@ require_once "../config/db.php";
 
 $clienti = $pdo->query("
     SELECT P.id_persona, P.nome, P.cognome, P.email, P.telefono,
-           C.stato_iscrizione, C.livello, C.certificato_medico_scadenza
+           C.stato_iscrizione, C.livello, C.certificato_medico_scadenza,
+           A.codice AS codice_abbonamento, A.tipo AS tipo_abbonamento,
+           A.stato AS stato_abbonamento, A.data_fine
     FROM PERSONA P
     JOIN CLIENTE C ON P.id_persona = C.id_persona
+    LEFT JOIN ABBONAMENTO A ON A.id_cliente = C.id_persona
+        AND A.stato = 'attivo'
+        AND A.data_fine >= CURDATE()
     ORDER BY P.cognome, P.nome
 ")->fetchAll();
 ?>
@@ -40,7 +45,7 @@ $clienti = $pdo->query("
         }
         .navbar a:hover { background: rgba(255,255,255,0.2); }
         .contenuto {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 40px auto;
             padding: 0 20px;
         }
@@ -80,6 +85,7 @@ $clienti = $pdo->query("
             font-size: 13px;
             border-bottom: 1px solid #f0f2f5;
             color: #333;
+            vertical-align: middle;
         }
         tr:last-child td { border-bottom: none; }
         tr:hover td { background: #f9f9f9; }
@@ -92,28 +98,29 @@ $clienti = $pdo->query("
         .badge.attivo { background: #e8f5e9; color: #2e7d32; }
         .badge.sospeso { background: #fff3e0; color: #e65100; }
         .badge.scaduto { background: #ffebee; color: #c62828; }
+        .badge.nessuno { background: #f5f5f5; color: #999; }
         .nessun-cliente {
             text-align: center;
             padding: 40px;
             color: #888;
             font-size: 15px;
         }
-        .btn-modifica {
-            background: #1a1a2e;
+        .btn-azione {
             color: white;
             padding: 4px 10px;
             border-radius: 6px;
             text-decoration: none;
             font-size: 12px;
+            display: inline-block;
+            margin: 2px 2px 2px 0;
         }
-        .btn-elimina {
-            background: #c62828;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 12px;
-            margin-left: 4px;
+        .btn-modifica { background: #1a1a2e; }
+        .btn-abbonamento { background: #2e7d32; }
+        .btn-elimina { background: #c62828; }
+        .codice-abb {
+            font-family: monospace;
+            font-size: 11px;
+            color: #555;
         }
     </style>
 </head>
@@ -138,9 +145,9 @@ $clienti = $pdo->query("
             <tr>
                 <th>Nome</th>
                 <th>Email</th>
-                <th>Telefono</th>
                 <th>Livello</th>
                 <th>Stato</th>
+                <th>Abbonamento attivo</th>
                 <th>Cert. Medico</th>
                 <th>Azioni</th>
             </tr>
@@ -153,19 +160,28 @@ $clienti = $pdo->query("
             <?php else: ?>
             <?php foreach($clienti as $c): ?>
             <tr>
-                <td><?= htmlspecialchars($c['cognome'].' '.$c['nome']) ?></td>
+                <td><strong><?= htmlspecialchars($c['cognome'].' '.$c['nome']) ?></strong><br><small style="color:#888"><?= htmlspecialchars($c['telefono']) ?></small></td>
                 <td><?= htmlspecialchars($c['email']) ?></td>
-                <td><?= htmlspecialchars($c['telefono']) ?></td>
                 <td><?= htmlspecialchars($c['livello']) ?></td>
                 <td>
                     <span class="badge <?= $c['stato_iscrizione'] ?>">
                         <?= $c['stato_iscrizione'] ?>
                     </span>
                 </td>
-                <td><?= $c['certificato_medico_scadenza'] ?? '—' ?></td>
                 <td>
-                    <a class="btn-modifica" href="modifica_cliente.php?id=<?= $c['id_persona'] ?>">✏️ Modifica</a>
-                    <a class="btn-elimina" href="elimina_cliente.php?id=<?= $c['id_persona'] ?>" onclick="return confirm('Sei sicuro di voler eliminare questo cliente?')">🗑️ Elimina</a>
+                    <?php if($c['codice_abbonamento']): ?>
+                        <span class="badge attivo"><?= $c['tipo_abbonamento'] ?></span><br>
+                        <span class="codice-abb"><?= htmlspecialchars($c['codice_abbonamento']) ?></span><br>
+                        <small style="color:#888">scade: <?= date('d/m/Y', strtotime($c['data_fine'])) ?></small>
+                    <?php else: ?>
+                        <span class="badge nessuno">Nessuno</span>
+                    <?php endif; ?>
+                </td>
+                <td><?= $c['certificato_medico_scadenza'] ? date('d/m/Y', strtotime($c['certificato_medico_scadenza'])) : '—' ?></td>
+                <td>
+                    <a class="btn-azione btn-modifica" href="modifica_cliente.php?id=<?= $c['id_persona'] ?>">✏️ Modifica</a>
+                    <a class="btn-azione btn-abbonamento" href="abbonamenti.php?id_cliente=<?= $c['id_persona'] ?>">💳 Abbonamenti</a>
+                    <a class="btn-azione btn-elimina" href="elimina_cliente.php?id=<?= $c['id_persona'] ?>" onclick="return confirm('Sei sicuro?')">🗑️ Elimina</a>
                 </td>
             </tr>
             <?php endforeach; ?>

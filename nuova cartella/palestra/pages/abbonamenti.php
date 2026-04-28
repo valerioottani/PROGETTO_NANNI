@@ -6,21 +6,32 @@ if(!isset($_SESSION['utente'])) {
 }
 require_once "../config/db.php";
 
-$sale = $pdo->query("
-    SELECT S.id_sala, S.nome, S.tipologia, S.capienza_max, 
-           S.stato, S.data_ultima_manutenzione,
-           COUNT(C.id_attrezzatura) AS num_attrezzature
-    FROM SALA S
-    LEFT JOIN CONTIENE C ON S.id_sala = C.id_sala
-    GROUP BY S.id_sala
-    ORDER BY S.nome
-")->fetchAll();
+$id_cliente = $_GET['id_cliente'] ?? null;
+if(!$id_cliente) {
+    header("Location: clienti.php");
+    exit;
+}
+
+$stmt = $pdo->prepare("
+    SELECT P.nome, P.cognome 
+    FROM PERSONA P WHERE P.id_persona = ?
+");
+$stmt->execute([$id_cliente]);
+$cliente = $stmt->fetch();
+
+$abbonamenti = $pdo->prepare("
+    SELECT * FROM ABBONAMENTO 
+    WHERE id_cliente = ?
+    ORDER BY data_inizio DESC
+");
+$abbonamenti->execute([$id_cliente]);
+$abbonamenti = $abbonamenti->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Sale</title>
+    <title>Abbonamenti</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f0f2f5; }
@@ -62,6 +73,15 @@ $sale = $pdo->query("
             font-size: 14px;
         }
         .btn:hover { background: #2d2d44; }
+        .cliente-box {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            margin-bottom: 24px;
+            font-size: 15px;
+            color: #1a1a2e;
+        }
         table {
             width: 100%;
             background: white;
@@ -92,9 +112,12 @@ $sale = $pdo->query("
             font-size: 11px;
             font-weight: bold;
         }
-        .badge.disponibile { background: #e8f5e9; color: #2e7d32; }
-        .badge.in_manutenzione { background: #fff3e0; color: #e65100; }
-        .badge.chiusa { background: #ffebee; color: #c62828; }
+        .badge.attivo { background: #e8f5e9; color: #2e7d32; }
+        .badge.scaduto { background: #ffebee; color: #c62828; }
+        .badge.sospeso { background: #fff3e0; color: #e65100; }
+        .badge.annullato { background: #f5f5f5; color: #999; }
+        .badge.mensile { background: #e3f2fd; color: #1565c0; }
+        .badge.annuale { background: #f3e5f5; color: #6a1b9a; }
         .nessun-record {
             text-align: center;
             padding: 40px;
@@ -110,9 +133,9 @@ $sale = $pdo->query("
             display: inline-block;
             margin: 2px 2px 2px 0;
         }
-        .btn-gestisci { background: #1565c0; }
         .btn-modifica { background: #1a1a2e; }
         .btn-elimina { background: #c62828; }
+        .codice { font-family: monospace; font-size: 12px; color: #555; }
     </style>
 </head>
 <body>
@@ -120,50 +143,50 @@ $sale = $pdo->query("
 <div class="navbar">
     <img src="../assets/logo.jpg" style="height:40px;">
     <div style="display:flex; gap:12px;">
-        <a href="dashboard.php">← Dashboard</a>
+        <a href="clienti.php">← Clienti</a>
         <a href="../logout.php">Esci</a>
     </div>
 </div>
 
 <div class="contenuto">
     <div class="intestazione">
-        <h2>🏠 Sale</h2>
-        <a class="btn" href="nuova_sala.php">+ Nuova Sala</a>
+        <h2>💳 Abbonamenti</h2>
+        <a class="btn" href="nuovo_abbonamento.php?id_cliente=<?= $id_cliente ?>">+ Nuovo Abbonamento</a>
+    </div>
+
+    <div class="cliente-box">
+        👤 <strong><?= htmlspecialchars($cliente['cognome'].' '.$cliente['nome']) ?></strong>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th>Nome</th>
-                <th>Tipologia</th>
-                <th>Capienza Max</th>
-                <th>Attrezzature</th>
-                <th>Ultima Manutenzione</th>
+                <th>Codice</th>
+                <th>Tipo</th>
+                <th>Inizio</th>
+                <th>Fine</th>
+                <th>Costo</th>
                 <th>Stato</th>
                 <th>Azioni</th>
             </tr>
         </thead>
         <tbody>
-            <?php if(empty($sale)): ?>
+            <?php if(empty($abbonamenti)): ?>
             <tr>
-                <td colspan="7" class="nessun-record">Nessuna sala ancora!</td>
+                <td colspan="7" class="nessun-record">Nessun abbonamento ancora — aggiungine uno!</td>
             </tr>
             <?php else: ?>
-            <?php foreach($sale as $s): ?>
+            <?php foreach($abbonamenti as $a): ?>
             <tr>
-                <td><strong><?= htmlspecialchars($s['nome']) ?></strong></td>
-                <td><?= htmlspecialchars($s['tipologia']) ?></td>
-                <td><?= $s['capienza_max'] ?> persone</td>
-                <td><?= $s['num_attrezzature'] ?> attrezzature</td>
-                <td><?= $s['data_ultima_manutenzione'] ? date('d/m/Y', strtotime($s['data_ultima_manutenzione'])) : '—' ?></td>
+                <td class="codice"><?= htmlspecialchars($a['codice']) ?></td>
+                <td><span class="badge <?= $a['tipo'] ?>"><?= $a['tipo'] ?></span></td>
+                <td><?= date('d/m/Y', strtotime($a['data_inizio'])) ?></td>
+                <td><?= date('d/m/Y', strtotime($a['data_fine'])) ?></td>
+                <td>€ <?= number_format($a['costo'], 2, ',', '.') ?></td>
+                <td><span class="badge <?= $a['stato'] ?>"><?= $a['stato'] ?></span></td>
                 <td>
-                    <span class="badge <?= $s['stato'] ?>">
-                        <?= $s['stato'] ?>
-                    </span>
-                </td>
-                <td>
-                    <a class="btn-azione btn-gestisci" href="gestisci_sala.php?id=<?= $s['id_sala'] ?>">🔧 Gestisci</a>
-                    <a class="btn-azione btn-elimina" href="elimina_sala.php?id=<?= $s['id_sala'] ?>" onclick="return confirm('Sei sicuro di voler eliminare questa sala?')">🗑️ Elimina</a>
+                    <a class="btn-azione btn-modifica" href="modifica_abbonamento.php?id=<?= $a['id_abbonamento'] ?>&id_cliente=<?= $id_cliente ?>">✏️ Modifica</a>
+                    <a class="btn-azione btn-elimina" href="elimina_abbonamento.php?id=<?= $a['id_abbonamento'] ?>&id_cliente=<?= $id_cliente ?>" onclick="return confirm('Sei sicuro?')">🗑️ Elimina</a>
                 </td>
             </tr>
             <?php endforeach; ?>

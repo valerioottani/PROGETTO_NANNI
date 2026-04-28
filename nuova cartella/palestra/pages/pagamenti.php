@@ -36,7 +36,6 @@ $totale = array_sum(array_column($pagamenti, 'importo'));
             justify-content: space-between;
             align-items: center;
         }
-        .navbar h1 { font-size: 20px; }
         .navbar a {
             color: white;
             text-decoration: none;
@@ -120,6 +119,23 @@ $totale = array_sum(array_column($pagamenti, 'importo'));
             color: #888;
             font-size: 15px;
         }
+        .btn-modifica {
+            background: #1a1a2e;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        .btn-elimina {
+            background: #c62828;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+            margin-left: 4px;
+        }
     </style>
 </head>
 <body>
@@ -155,12 +171,13 @@ $totale = array_sum(array_column($pagamenti, 'importo'));
                 <th>Data</th>
                 <th>Metodo</th>
                 <th>Stato</th>
+                <th>Azioni</th>
             </tr>
         </thead>
         <tbody>
             <?php if(empty($pagamenti)): ?>
             <tr>
-                <td colspan="6" class="nessun-record">Nessun pagamento ancora!</td>
+                <td colspan="7" class="nessun-record">Nessun pagamento ancora!</td>
             </tr>
             <?php else: ?>
             <?php foreach($pagamenti as $p): ?>
@@ -174,6 +191,10 @@ $totale = array_sum(array_column($pagamenti, 'importo'));
                     <span class="badge <?= $p['stato'] ?>">
                         <?= $p['stato'] ?>
                     </span>
+                </td>
+                <td>
+                    <a class="btn-modifica" href="modifica_pagamento.php?id=<?= $p['id_pagamento'] ?>">✏️ Modifica</a>
+                    <a class="btn-elimina" href="elimina_pagamento.php?id=<?= $p['id_pagamento'] ?>" onclick="return confirm('Sei sicuro di voler eliminare questo pagamento?')">🗑️ Elimina</a>
                 </td>
             </tr>
             <?php endforeach; ?>

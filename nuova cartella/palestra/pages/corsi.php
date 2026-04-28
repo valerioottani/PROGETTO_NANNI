@@ -29,7 +29,6 @@ $corsi = $pdo->query("
             justify-content: space-between;
             align-items: center;
         }
-        .navbar h1 { font-size: 20px; }
         .navbar a {
             color: white;
             text-decoration: none;
@@ -98,6 +97,23 @@ $corsi = $pdo->query("
             color: #888;
             font-size: 15px;
         }
+        .btn-modifica {
+            background: #1a1a2e;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        .btn-elimina {
+            background: #c62828;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+            margin-left: 4px;
+        }
     </style>
 </head>
 <body>
@@ -124,12 +140,13 @@ $corsi = $pdo->query("
                 <th>Durata</th>
                 <th>Max Partecipanti</th>
                 <th>Stato</th>
+                <th>Azioni</th>
             </tr>
         </thead>
         <tbody>
             <?php if(empty($corsi)): ?>
             <tr>
-                <td colspan="5" class="nessun-record">Nessun corso ancora — aggiungine uno!</td>
+                <td colspan="6" class="nessun-record">Nessun corso ancora!</td>
             </tr>
             <?php else: ?>
             <?php foreach($corsi as $c): ?>
@@ -145,6 +162,10 @@ $corsi = $pdo->query("
                     <span class="badge <?= $c['stato'] ?>">
                         <?= $c['stato'] ?>
                     </span>
+                </td>
+                <td>
+                    <a class="btn-modifica" href="modifica_corso.php?id=<?= $c['id_corso'] ?>">✏️ Modifica</a>
+                    <a class="btn-elimina" href="elimina_corso.php?id=<?= $c['id_corso'] ?>" onclick="return confirm('Sei sicuro di voler eliminare questo corso?')">🗑️ Elimina</a>
                 </td>
             </tr>
             <?php endforeach; ?>
