@@ -117,10 +117,7 @@ $clienti = $pdo->query("
 
 <div class="navbar">
     <img src="../assets/logo.jpg" style="height:40px;">
-    <div style="display:flex; gap:12px;">
-        <a href="dashboard.php">← Dashboard</a>
-        <a href="../logout.php">Esci</a>
-    </div>
+    <a href="dashboard.php">← Dashboard</a>
 </div>
 
 <div class="contenuto">

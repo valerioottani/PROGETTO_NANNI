@@ -4,23 +4,44 @@ if(!isset($_SESSION['utente'])) {
     header("Location: ../index.php");
     exit;
 }
+if($_SESSION['utente']['ruolo'] === 'admin') {
+    header("Location: ../pages/dashboard.php");
+    exit;
+}
 require_once "../config/db.php";
 
-$lezioni = $pdo->query("
-    SELECT L.id_lezione, L.data, L.ora_inizio, L.ora_fine,
-           L.tipo_lezione, L.stato, L.note,
-           C.nome AS corso, S.nome AS sala
-    FROM LEZIONE L
+$utente = $_SESSION['utente'];
+
+if(isset($_GET['annulla'])) {
+    try {
+        $stmt = $pdo->prepare("
+            UPDATE PRENOTAZIONE SET stato='annullata'
+            WHERE id_prenotazione = ? AND id_cliente = ?
+        ");
+        $stmt->execute([$_GET['annulla'], $utente['id_persona']]);
+    } catch(Exception $e) {}
+    header("Location: prenotazioni_cliente.php");
+    exit;
+}
+
+$stmt = $pdo->prepare("
+    SELECT PR.id_prenotazione, PR.stato, PR.presenza, PR.data_prenotazione,
+           C.nome AS corso, L.data, L.ora_inizio, L.ora_fine, S.nome AS sala
+    FROM PRENOTAZIONE PR
+    JOIN LEZIONE L ON PR.id_lezione = L.id_lezione
     JOIN CORSO C ON L.id_corso = C.id_corso
     JOIN SALA S ON L.id_sala = S.id_sala
-    ORDER BY L.data DESC, L.ora_inizio
-")->fetchAll();
+    WHERE PR.id_cliente = ?
+    ORDER BY L.data DESC, L.ora_inizio DESC
+");
+$stmt->execute([$utente['id_persona']]);
+$prenotazioni = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Lezioni</title>
+    <title>Le mie prenotazioni</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f0f2f5; }
@@ -40,9 +61,9 @@ $lezioni = $pdo->query("
             padding: 6px 16px;
             border-radius: 6px;
         }
-        .navbar a:hover { background: rgba(255,255,255,0.2); }
+        .navbar-links { display: flex; gap: 10px; }
         .contenuto {
-            max-width: 1100px;
+            max-width: 1000px;
             margin: 40px auto;
             padding: 0 20px;
         }
@@ -53,15 +74,6 @@ $lezioni = $pdo->query("
             margin-bottom: 24px;
         }
         .intestazione h2 { font-size: 22px; color: #1a1a2e; }
-        .btn {
-            background: #1a1a2e;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        .btn:hover { background: #2d2d44; }
         table {
             width: 100%;
             background: white;
@@ -82,6 +94,7 @@ $lezioni = $pdo->query("
             font-size: 13px;
             border-bottom: 1px solid #f0f2f5;
             color: #333;
+            vertical-align: middle;
         }
         tr:last-child td { border-bottom: none; }
         tr:hover td { background: #f9f9f9; }
@@ -91,32 +104,25 @@ $lezioni = $pdo->query("
             font-size: 11px;
             font-weight: bold;
         }
-        .badge.programmata { background: #e3f2fd; color: #1565c0; }
-        .badge.in_corso { background: #e8f5e9; color: #2e7d32; }
-        .badge.completata { background: #f3e5f5; color: #6a1b9a; }
+        .badge.confermata { background: #e8f5e9; color: #2e7d32; }
+        .badge.in_attesa { background: #fff3e0; color: #e65100; }
         .badge.annullata { background: #ffebee; color: #c62828; }
-        .nessun-record {
-            text-align: center;
-            padding: 40px;
-            color: #888;
-            font-size: 15px;
-        }
-        .btn-modifica {
-            background: #1a1a2e;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 12px;
-        }
-        .btn-elimina {
+        .badge.completata { background: #f3e5f5; color: #6a1b9a; }
+        .presenza-si { color: #2e7d32; font-weight: bold; }
+        .presenza-no { color: #888; }
+        .btn-annulla {
             background: #c62828;
             color: white;
             padding: 4px 10px;
             border-radius: 6px;
             text-decoration: none;
             font-size: 12px;
-            margin-left: 4px;
+        }
+        .nessun-record {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+            font-size: 15px;
         }
     </style>
 </head>
@@ -124,51 +130,57 @@ $lezioni = $pdo->query("
 
 <div class="navbar">
     <img src="../assets/logo.jpg" style="height:40px;">
-    <div style="display:flex; gap:12px;">
-        <a href="dashboard.php">← Dashboard</a>
-        
+    <div class="navbar-links">
+        <a href="dashboard_cliente.php">🏠 Dashboard</a>
+       
     </div>
 </div>
 
 <div class="contenuto">
     <div class="intestazione">
-        <h2>📅 Lezioni</h2>
-        <a class="btn" href="nuova_lezione.php">+ Nuova Lezione</a>
+        <h2>📋 Le mie prenotazioni</h2>
     </div>
 
     <table>
         <thead>
             <tr>
                 <th>Corso</th>
-                <th>Sala</th>
                 <th>Data</th>
                 <th>Orario</th>
-                <th>Tipo</th>
+                <th>Sala</th>
+                <th>Presenza</th>
                 <th>Stato</th>
                 <th>Azioni</th>
             </tr>
         </thead>
         <tbody>
-            <?php if(empty($lezioni)): ?>
+            <?php if(empty($prenotazioni)): ?>
             <tr>
-                <td colspan="7" class="nessun-record">Nessuna lezione ancora!</td>
+                <td colspan="7" class="nessun-record">Nessuna prenotazione ancora!</td>
             </tr>
             <?php else: ?>
-            <?php foreach($lezioni as $l): ?>
+            <?php foreach($prenotazioni as $p): ?>
             <tr>
-                <td><strong><?= htmlspecialchars($l['corso']) ?></strong></td>
-                <td><?= htmlspecialchars($l['sala']) ?></td>
-                <td><?= date('d/m/Y', strtotime($l['data'])) ?></td>
-                <td><?= substr($l['ora_inizio'],0,5) ?> - <?= substr($l['ora_fine'],0,5) ?></td>
-                <td><?= htmlspecialchars($l['tipo_lezione'] ?? '—') ?></td>
+                <td><strong><?= htmlspecialchars($p['corso']) ?></strong></td>
+                <td><?= date('d/m/Y', strtotime($p['data'])) ?></td>
+                <td><?= substr($p['ora_inizio'],0,5) ?> - <?= substr($p['ora_fine'],0,5) ?></td>
+                <td><?= htmlspecialchars($p['sala']) ?></td>
                 <td>
-                    <span class="badge <?= $l['stato'] ?>">
-                        <?= $l['stato'] ?>
-                    </span>
+                    <?php if($p['presenza']): ?>
+                        <span class="presenza-si">✓ Presente</span>
+                    <?php else: ?>
+                        <span class="presenza-no">— Da confermare</span>
+                    <?php endif; ?>
                 </td>
                 <td>
-                    <a class="btn-modifica" href="modifica_lezione.php?id=<?= $l['id_lezione'] ?>">✏️ Modifica</a>
-                    <a class="btn-elimina" href="elimina_lezione.php?id=<?= $l['id_lezione'] ?>" onclick="return confirm('Sei sicuro di voler eliminare questa lezione?')">🗑️ Elimina</a>
+                    <span class="badge <?= $p['stato'] ?>"><?= $p['stato'] ?></span>
+                </td>
+                <td>
+                    <?php if($p['stato'] === 'confermata' && strtotime($p['data']) >= strtotime(date('Y-m-d'))): ?>
+                    <a class="btn-annulla" href="prenotazioni_cliente.php?annulla=<?= $p['id_prenotazione'] ?>" onclick="return confirm('Vuoi annullare questa prenotazione?')">❌ Annulla</a>
+                    <?php else: ?>
+                    <span style="color:#ccc;font-size:12px;">—</span>
+                    <?php endif; ?>
                 </td>
             </tr>
             <?php endforeach; ?>

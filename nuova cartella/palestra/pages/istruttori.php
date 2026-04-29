@@ -80,6 +80,7 @@ $istruttori = $pdo->query("
             font-size: 13px;
             border-bottom: 1px solid #f0f2f5;
             color: #333;
+            vertical-align: middle;
         }
         tr:last-child td { border-bottom: none; }
         tr:hover td { background: #f9f9f9; }
@@ -98,33 +99,24 @@ $istruttori = $pdo->query("
             color: #888;
             font-size: 15px;
         }
-        .btn-modifica {
-            background: #1a1a2e;
+        .btn-azione {
             color: white;
             padding: 4px 10px;
             border-radius: 6px;
             text-decoration: none;
             font-size: 12px;
+            display: inline-block;
+            margin: 2px 2px 2px 0;
         }
-        .btn-elimina {
-            background: #c62828;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 12px;
-            margin-left: 4px;
-        }
+        .btn-modifica { background: #1a1a2e; }
+        .btn-elimina { background: #c62828; }
     </style>
 </head>
 <body>
 
 <div class="navbar">
     <img src="../assets/logo.jpg" style="height:40px;">
-    <div style="display:flex; gap:12px;">
-        <a href="dashboard.php">← Dashboard</a>
-        <a href="../logout.php">Esci</a>
-    </div>
+    <a href="dashboard.php">← Dashboard</a>
 </div>
 
 <div class="contenuto">
@@ -164,8 +156,8 @@ $istruttori = $pdo->query("
                 <td>€ <?= number_format($i['stipendio'], 2, ',', '.') ?></td>
                 <td><?= date('d/m/Y', strtotime($i['data_assunzione'])) ?></td>
                 <td>
-                    <a class="btn-modifica" href="modifica_istruttore.php?id=<?= $i['id_persona'] ?>">✏️ Modifica</a>
-                    <a class="btn-elimina" href="elimina_istruttore.php?id=<?= $i['id_persona'] ?>" onclick="return confirm('Sei sicuro di voler eliminare questo istruttore?')">🗑️ Elimina</a>
+                    <a class="btn-azione btn-modifica" href="modifica_istruttore.php?id=<?= $i['id_persona'] ?>">✏️ Modifica</a>
+                    <a class="btn-azione btn-elimina" href="elimina_istruttore.php?id=<?= $i['id_persona'] ?>" onclick="return confirm('Sei sicuro?')">🗑️ Elimina</a>
                 </td>
             </tr>
             <?php endforeach; ?>

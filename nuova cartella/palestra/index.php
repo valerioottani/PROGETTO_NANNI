@@ -1,7 +1,11 @@
 <?php
 session_start();
 if(isset($_SESSION['utente'])) {
-    header("Location: pages/dashboard.php");
+    if($_SESSION['utente']['ruolo'] === 'admin') {
+        header("Location: pages/dashboard.php");
+    } else {
+        header("Location: cliente/dashboard_cliente.php");
+    }
     exit;
 }
 
@@ -18,7 +22,11 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if($utente && password_verify($password, $utente['password'])) {
         $_SESSION['utente'] = $utente;
-        header("Location: pages/dashboard.php");
+        if($utente['ruolo'] === 'admin') {
+            header("Location: pages/dashboard.php");
+        } else {
+            header("Location: cliente/dashboard_cliente.php");
+        }
         exit;
     } else {
         $errore = "Username o password errati";
@@ -29,7 +37,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Palestra — Login</title>
+    <title>GymManager — Login</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -47,12 +55,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 2px 12px rgba(0,0,0,0.1);
             width: 360px;
         }
-        h1 {
-            text-align: center;
-            margin-bottom: 8px;
-            font-size: 24px;
-            color: #1a1a2e;
-        }
+        .logo { text-align: center; margin-bottom: 24px; }
+        .logo img { height: 80px; }
         .sottotitolo {
             text-align: center;
             color: #888;
@@ -99,7 +103,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 <div class="box">
-    <img src="assets/logo.jpg" style="height:80px; display:block; margin:0 auto 16px;">
+    <div class="logo">
+        <img src="assets/logo.jpg">
+    </div>
     <p class="sottotitolo">Accedi al gestionale</p>
     <?php if($errore): ?>
         <div class="errore"><?= $errore ?></div>

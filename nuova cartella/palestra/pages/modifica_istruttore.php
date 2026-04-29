@@ -33,40 +33,16 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
 
-        $stmt = $pdo->prepare("
-            UPDATE PERSONA 
-            SET nome=?, cognome=?, email=?, telefono=?
-            WHERE id_persona=?
-        ");
-        $stmt->execute([
-            $_POST['nome'],
-            $_POST['cognome'],
-            $_POST['email'],
-            $_POST['telefono'],
-            $id
-        ]);
+        $stmt = $pdo->prepare("UPDATE PERSONA SET nome=?, cognome=?, email=?, telefono=? WHERE id_persona=?");
+        $stmt->execute([$_POST['nome'], $_POST['cognome'], $_POST['email'], $_POST['telefono'], $id]);
 
-        $stmt2 = $pdo->prepare("
-            UPDATE ISTRUTTORE 
-            SET tipo_contratto=?, stipendio=?, data_assunzione=?
-            WHERE id_persona=?
-        ");
-        $stmt2->execute([
-            $_POST['tipo_contratto'],
-            $_POST['stipendio'],
-            $_POST['data_assunzione'],
-            $id
-        ]);
+        $stmt2 = $pdo->prepare("UPDATE ISTRUTTORE SET tipo_contratto=?, stipendio=?, data_assunzione=? WHERE id_persona=?");
+        $stmt2->execute([$_POST['tipo_contratto'], $_POST['stipendio'], $_POST['data_assunzione'], $id]);
 
         $pdo->commit();
         $successo = "Istruttore aggiornato con successo!";
 
-        $stmt = $pdo->prepare("
-            SELECT P.*, I.tipo_contratto, I.stipendio, I.data_assunzione
-            FROM PERSONA P
-            JOIN ISTRUTTORE I ON P.id_persona = I.id_persona
-            WHERE P.id_persona = ?
-        ");
+        $stmt = $pdo->prepare("SELECT P.*, I.tipo_contratto, I.stipendio, I.data_assunzione FROM PERSONA P JOIN ISTRUTTORE I ON P.id_persona = I.id_persona WHERE P.id_persona = ?");
         $stmt->execute([$id]);
         $istruttore = $stmt->fetch();
 
@@ -112,18 +88,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 32px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.07);
         }
-        .riga {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
+        .riga { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .campo { margin-bottom: 18px; }
-        label {
-            display: block;
-            font-size: 13px;
-            color: #555;
-            margin-bottom: 6px;
-        }
+        label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; }
         input, select {
             width: 100%;
             padding: 10px 14px;
@@ -144,40 +111,16 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
             width: 100%;
         }
         .btn:hover { background: #2d2d44; }
-        .errore {
-            background: #ffebee;
-            color: #c62828;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 13px;
-        }
-        .successo {
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 13px;
-        }
-        .sezione {
-            font-size: 13px;
-            font-weight: bold;
-            color: #1a1a2e;
-            margin: 20px 0 12px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid #f0f2f5;
-        }
+        .errore { background: #ffebee; color: #c62828; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; }
+        .successo { background: #e8f5e9; color: #2e7d32; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; }
+        .sezione { font-size: 13px; font-weight: bold; color: #1a1a2e; margin: 20px 0 12px; padding-bottom: 6px; border-bottom: 1px solid #f0f2f5; }
     </style>
 </head>
 <body>
 
 <div class="navbar">
     <img src="../assets/logo.jpg" style="height:40px;">
-    <div style="display:flex; gap:12px;">
-        <a href="istruttori.php">← Istruttori</a>
-        <a href="../logout.php">Esci</a>
-    </div>
+    <a href="istruttori.php">← Istruttori</a>
 </div>
 
 <div class="contenuto">

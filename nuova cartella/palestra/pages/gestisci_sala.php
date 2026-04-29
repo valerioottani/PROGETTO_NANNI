@@ -225,7 +225,7 @@ if(isset($_GET['modifica_att'])) {
     <img src="../assets/logo.jpg" style="height:40px;">
     <div style="display:flex; gap:12px;">
         <a href="sale.php">← Sale</a>
-        <a href="../logout.php">Esci</a>
+        
     </div>
 </div>
 

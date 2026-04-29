@@ -11,17 +11,19 @@ $successo = "";
 
 if($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        $password_hash = password_hash($_POST['password'], PASSWORD_DEFAULT);
-        
         $pdo->beginTransaction();
         
+        // Generiamo username e password automatici — l'istruttore non accede
+        $username_auto = 'istr_' . uniqid();
+        $password_auto = password_hash(uniqid(), PASSWORD_DEFAULT);
+        
         $stmt = $pdo->prepare("
-            INSERT INTO PERSONA (username, password, email, nome, cognome, telefono)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO PERSONA (username, password, email, nome, cognome, telefono, ruolo)
+            VALUES (?, ?, ?, ?, ?, ?, 'istruttore')
         ");
         $stmt->execute([
-            $_POST['username'],
-            $password_hash,
+            $username_auto,
+            $password_auto,
             $_POST['email'],
             $_POST['nome'],
             $_POST['cognome'],
@@ -86,18 +88,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 32px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.07);
         }
-        .riga {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
+        .riga { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .campo { margin-bottom: 18px; }
-        label {
-            display: block;
-            font-size: 13px;
-            color: #555;
-            margin-bottom: 6px;
-        }
+        label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; }
         input, select {
             width: 100%;
             padding: 10px 14px;
@@ -118,40 +111,16 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
             width: 100%;
         }
         .btn:hover { background: #2d2d44; }
-        .errore {
-            background: #ffebee;
-            color: #c62828;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 13px;
-        }
-        .successo {
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 13px;
-        }
-        .sezione {
-            font-size: 13px;
-            font-weight: bold;
-            color: #1a1a2e;
-            margin: 20px 0 12px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid #f0f2f5;
-        }
+        .errore { background: #ffebee; color: #c62828; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; }
+        .successo { background: #e8f5e9; color: #2e7d32; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; }
+        .sezione { font-size: 13px; font-weight: bold; color: #1a1a2e; margin: 20px 0 12px; padding-bottom: 6px; border-bottom: 1px solid #f0f2f5; }
     </style>
 </head>
 <body>
 
 <div class="navbar">
     <img src="../assets/logo.jpg" style="height:40px;">
-    <div style="display:flex; gap:12px;">
-        <a href="istruttori.php">← Istruttori</a>
-        <a href="../logout.php">Esci</a>
-    </div>
+    <a href="istruttori.php">← Istruttori</a>
 </div>
 
 <div class="contenuto">
@@ -184,18 +153,6 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="campo">
                     <label>Telefono</label>
                     <input type="text" name="telefono">
-                </div>
-            </div>
-
-            <div class="sezione">Credenziali accesso</div>
-            <div class="riga">
-                <div class="campo">
-                    <label>Username *</label>
-                    <input type="text" name="username" required>
-                </div>
-                <div class="campo">
-                    <label>Password *</label>
-                    <input type="password" name="password" required>
                 </div>
             </div>
 

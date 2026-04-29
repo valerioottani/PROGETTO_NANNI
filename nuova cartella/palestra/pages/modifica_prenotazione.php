@@ -171,7 +171,7 @@ $dettagli = $stmt->fetch();
     <img src="../assets/logo.jpg" style="height:40px;">
     <div style="display:flex; gap:12px;">
         <a href="prenotazioni.php">← Prenotazioni</a>
-        <a href="../logout.php">Esci</a>
+        
     </div>
 </div>
 

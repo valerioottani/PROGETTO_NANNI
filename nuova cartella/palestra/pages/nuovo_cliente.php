@@ -16,8 +16,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->beginTransaction();
         
         $stmt = $pdo->prepare("
-            INSERT INTO PERSONA (username, password, email, nome, cognome, telefono)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO PERSONA (username, password, email, nome, cognome, telefono, ruolo)
+            VALUES (?, ?, ?, ?, ?, ?, 'cliente')
         ");
         $stmt->execute([
             $_POST['username'],
@@ -67,7 +67,6 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
             justify-content: space-between;
             align-items: center;
         }
-        .navbar h1 { font-size: 20px; }
         .navbar a {
             color: white;
             text-decoration: none;
@@ -81,11 +80,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin: 40px auto;
             padding: 0 20px;
         }
-        h2 {
-            font-size: 22px;
-            color: #1a1a2e;
-            margin-bottom: 24px;
-        }
+        h2 { font-size: 22px; color: #1a1a2e; margin-bottom: 24px; }
         .form-box {
             background: white;
             border-radius: 12px;
@@ -97,9 +92,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
             grid-template-columns: 1fr 1fr;
             gap: 16px;
         }
-        .campo {
-            margin-bottom: 18px;
-        }
+        .campo { margin-bottom: 18px; }
         label {
             display: block;
             font-size: 13px;
@@ -156,15 +149,11 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="navbar">
     <img src="../assets/logo.jpg" style="height:40px;">
-    <div style="display:flex; gap:12px;">
-        <a href="clienti.php">← Clienti</a>
-        <a href="../logout.php">Esci</a>
-    </div>
+    <a href="clienti.php">← Clienti</a>
 </div>
 
 <div class="contenuto">
     <h2>+ Nuovo Cliente</h2>
-
     <div class="form-box">
         <?php if($errore): ?>
             <div class="errore"><?= $errore ?></div>
@@ -174,6 +163,18 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="POST">
+            <div class="sezione">Credenziali accesso</div>
+            <div class="riga">
+                <div class="campo">
+                    <label>Username *</label>
+                    <input type="text" name="username" required>
+                </div>
+                <div class="campo">
+                    <label>Password *</label>
+                    <input type="password" name="password" required>
+                </div>
+            </div>
+
             <div class="sezione">Dati personali</div>
             <div class="riga">
                 <div class="campo">
@@ -193,18 +194,6 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="campo">
                     <label>Telefono</label>
                     <input type="text" name="telefono">
-                </div>
-            </div>
-
-            <div class="sezione">Credenziali accesso</div>
-            <div class="riga">
-                <div class="campo">
-                    <label>Username *</label>
-                    <input type="text" name="username" required>
-                </div>
-                <div class="campo">
-                    <label>Password *</label>
-                    <input type="password" name="password" required>
                 </div>
             </div>
 
