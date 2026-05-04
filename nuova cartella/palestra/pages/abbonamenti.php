@@ -144,7 +144,7 @@ $abbonamenti = $abbonamenti->fetchAll();
     <img src="../assets/logo.jpg" style="height:40px;">
     <div style="display:flex; gap:12px;">
         <a href="clienti.php">← Clienti</a>
-        <a href="../logout.php">Esci</a>
+        
     </div>
 </div>
 

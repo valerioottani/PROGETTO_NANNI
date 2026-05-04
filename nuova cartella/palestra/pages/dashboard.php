@@ -80,12 +80,12 @@ $utente = $_SESSION['utente'];
 
 <div class="navbar">
     <img src="../assets/logo.jpg" style="height:40px;">
-    <span style="font-size:14px;">Ciao, <?= htmlspecialchars($utente['nome']) ?>!</span>
+    
     <a href="../logout.php">Esci</a>
 </div>
 
 <div class="contenuto">
-    <div class="benvenuto">Benvenuto, <?= htmlspecialchars($utente['nome']) ?>!</div>
+    <div class="benvenuto">Benvenuto, Amministratore!
     <div class="sottotitolo">Cosa vuoi gestire oggi?</div>
 
     <div class="griglia">
